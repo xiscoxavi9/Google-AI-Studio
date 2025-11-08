@@ -1,3 +1,4 @@
+
 import { Nutrient } from '../types';
 
 export const nutrientsData: Nutrient[] = [
@@ -8,6 +9,7 @@ export const nutrientsData: Nutrient[] = [
     bannerImage: 'https://cdn1.genspark.ai/user-upload-image/6_generated/g_0_20240729_195232_162002_30.jpeg',
     videoId: 'nttRQvu-qPs',
     color: 'border-accent',
+    category: 'macronutrient',
     conceptMap: {
       title: 'Mapa Conceptual: Hidrats de Carboni',
       mainPoints: [
@@ -85,6 +87,7 @@ export const nutrientsData: Nutrient[] = [
     bannerImage: 'https://cdn1.genspark.ai/user-upload-image/6_generated/g_0_20240729_195234_728619_30.jpeg',
     videoId: '4I6QtebiSkc',
     color: 'border-yellow-500',
+    category: 'macronutrient',
     conceptMap: {
       title: 'Mapa Conceptual: Lípids (Greixos)',
       mainPoints: [
@@ -175,6 +178,7 @@ export const nutrientsData: Nutrient[] = [
     bannerImage: 'https://cdn1.genspark.ai/user-upload-image/6_generated/g_0_20240729_195237_797543_30.jpeg',
     videoId: '8kq7hwXRfTU',
     color: 'border-red-500',
+    category: 'macronutrient',
     conceptMap: {
       title: 'Mapa Conceptual: Proteïnes',
       mainPoints: [
@@ -260,6 +264,7 @@ export const nutrientsData: Nutrient[] = [
     bannerImage: 'https://cdn1.genspark.ai/user-upload-image/6_generated/g_0_20240729_195240_805030_30.jpeg',
     videoId: 'SSeuqM3fmoU',
     color: 'border-secondary',
+    category: 'micronutrient',
     conceptMap: {
       title: 'Mapa Conceptual: Vitamines',
       mainPoints: [
@@ -336,6 +341,7 @@ export const nutrientsData: Nutrient[] = [
     bannerImage: 'https://cdn1.genspark.ai/user-upload-image/6_generated/g_0_20240729_195243_997637_30.jpeg',
     videoId: 'SSeuqM3fmoU',
     color: 'border-purple-500',
+    category: 'micronutrient',
     conceptMap: {
       title: 'Mapa Conceptual: Minerals',
       mainPoints: [
@@ -415,6 +421,7 @@ export const nutrientsData: Nutrient[] = [
     bannerImage: 'https://cdn1.genspark.ai/user-upload-image/6_generated/g_0_20240729_195246_953372_30.jpeg',
     videoId: 'QGmM7jyUtmw',
     color: 'border-blue-400',
+    category: 'other',
     conceptMap: {
       title: 'Mapa Conceptual: Aigua (H₂O)',
       mainPoints: [

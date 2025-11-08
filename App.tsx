@@ -17,7 +17,7 @@ import EscapeRoomPage from './pages/EscapeRoomPage';
 import ChallengePage from './pages/ChallengePage';
 
 
-import { TestTube, Stethoscope } from 'lucide-react';
+import { TestTube, Stethoscope, HeartPulse } from 'lucide-react';
 
 const App: React.FC = () => {
   return (
@@ -52,6 +52,13 @@ const App: React.FC = () => {
                 icon={<Stethoscope size={64} className="text-secondary" />} 
                 title="Sala del Nutricionista" 
                 description="Proximament: Consulta amb el nostre expert en nutrició i dietètica" 
+              />
+            } />
+             <Route path="/avaluacio-nutricional" element={
+              <PlaceholderPage 
+                icon={<HeartPulse size={64} className="text-primary" />} 
+                title="Avaluació Nutricional" 
+                description="Proximament: Eines per avaluar la teva dieta i obtenir recomanacions personalitzades." 
               />
             } />
           </Routes>

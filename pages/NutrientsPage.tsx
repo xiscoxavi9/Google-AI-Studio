@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { nutrientsData } from '../data/nutrients';
 
 const NutrientCard: React.FC<{ nutrient: typeof nutrientsData[0] }> = ({ nutrient }) => {
@@ -18,14 +18,40 @@ const NutrientCard: React.FC<{ nutrient: typeof nutrientsData[0] }> = ({ nutrien
 
 
 const NutrientsPage: React.FC = () => {
+  const [searchParams] = useSearchParams();
+  const categoryFilter = searchParams.get('category');
+
+  const filteredNutrients = categoryFilter
+    ? nutrientsData.filter(nutrient => nutrient.category === categoryFilter)
+    : nutrientsData;
+
+  const getTitle = () => {
+    switch(categoryFilter) {
+      case 'macronutrient':
+        return 'Macronutrients';
+      case 'micronutrient':
+        return 'Micronutrients';
+      case 'other':
+        return 'Aigua';
+      default:
+        return 'Tots els Nutrients';
+    }
+  }
+
   return (
     <div className="animate-fade-in-up">
-      <h1 className="text-4xl font-black text-center mb-12 text-text-primary">Sala de Nutrients</h1>
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-        {nutrientsData.map((nutrient) => (
-          <NutrientCard key={nutrient.id} nutrient={nutrient} />
-        ))}
-      </div>
+      <h1 className="text-4xl font-black text-center mb-12 text-text-primary">
+        Sala de Nutrients: <span className="text-primary">{getTitle()}</span>
+      </h1>
+      {filteredNutrients.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          {filteredNutrients.map((nutrient) => (
+            <NutrientCard key={nutrient.id} nutrient={nutrient} />
+          ))}
+        </div>
+      ) : (
+         <p className="text-center text-text-secondary">No s'han trobat nutrients per a aquesta categoria.</p>
+      )}
     </div>
   );
 };

@@ -6,6 +6,7 @@ export interface Nutrient {
   bannerImage: string;
   videoId: string;
   color: string;
+  category: 'macronutrient' | 'micronutrient' | 'other';
   conceptMap: {
     title: string;
     mainPoints: {

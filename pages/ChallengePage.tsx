@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { escapeRoomData } from '../data/escapeRoomData';
@@ -9,13 +8,30 @@ const ChallengePage: React.FC = () => {
   const { challengeId } = useParams<{ challengeId: string }>();
   const challenge = escapeRoomData.challenges.find(c => c.id === challengeId);
 
-  const [activities, setActivities] = useState<Activity[]>(challenge?.activities || []);
+  const [activities, setActivities] = useState<Activity[]>([]);
   const [showClue, setShowClue] = useState(false);
+  const [selectedItem, setSelectedItem] = useState<{ activityIndex: number; itemIndex: number } | null>(null);
 
   useEffect(() => {
-    // Reset state if challenge changes
-    setActivities(challenge?.activities || []);
+    const newChallenge = escapeRoomData.challenges.find(c => c.id === challengeId);
+    if (newChallenge) {
+      const initialActivities = JSON.parse(JSON.stringify(newChallenge.activities));
+      
+      initialActivities.forEach((activity: Activity) => {
+        // Initialize userInputs if not present
+        if (!activity.userInputs || activity.userInputs.length === 0) {
+          let size = 0;
+          if (activity.type === 'fill-in-blanks') size = activity.data.solutions.length;
+          else if (activity.type === 'classification') size = activity.data.items.length;
+          // You can add more types here
+          activity.userInputs = Array(size).fill('');
+        }
+      });
+
+      setActivities(initialActivities);
+    }
     setShowClue(false);
+    setSelectedItem(null);
   }, [challengeId]);
 
   if (!challenge) {
@@ -23,12 +39,20 @@ const ChallengePage: React.FC = () => {
   }
 
   const handleInputChange = (activityIndex: number, inputIndex: number, value: string | string[]) => {
-    const newActivities = [...activities];
-    if (!newActivities[activityIndex].userInputs) {
-      newActivities[activityIndex].userInputs = [];
-    }
-    newActivities[activityIndex].userInputs![inputIndex] = value;
-    setActivities(newActivities);
+    setActivities(prevActivities => 
+      prevActivities.map((activity, idx) => {
+        if (idx === activityIndex) {
+          const newUserInputs = [...(activity.userInputs || [])] as (string | string[])[];
+          // Ensure array is long enough
+          while (newUserInputs.length <= inputIndex) {
+            newUserInputs.push('');
+          }
+          newUserInputs[inputIndex] = value;
+          return { ...activity, userInputs: newUserInputs };
+        }
+        return activity;
+      })
+    );
   };
   
   const checkAnswers = () => {
@@ -65,6 +89,7 @@ const ChallengePage: React.FC = () => {
                       type="text"
                       className="border-b-2 border-primary bg-transparent mx-1 px-1 w-24 text-center"
                       onChange={(e) => handleInputChange(activityIndex, i, e.target.value)}
+                      value={(activity.userInputs?.[i] as string) || ''}
                     />
                   )}
                 </React.Fragment>
@@ -72,30 +97,79 @@ const ChallengePage: React.FC = () => {
             </div>
           </div>
         );
-      case 'classification':
-         return (
-            <div>
-              <p>{activity.instructions}</p>
-              <div className="mt-4 grid grid-cols-1 md:grid-cols-3 gap-4">
-                {activity.data.categories.map((cat: string, catIndex: number) => (
-                    <div key={catIndex} className="bg-slate-100 p-4 rounded-lg">
-                        <h4 className="font-bold text-center mb-2">{cat}</h4>
-                        {/* Placeholder for drag & drop or selection */}
-                        <div className="min-h-[100px] border-2 border-dashed rounded-lg p-2">
-                            <p className="text-xs text-slate-400 text-center">Arrossega els aliments aquí</p>
-                        </div>
+      case 'classification': {
+        const placements = (activity.userInputs || []) as string[];
+
+        const handleItemClick = (itemIndex: number) => {
+          if (selectedItem?.itemIndex === itemIndex && selectedItem?.activityIndex === activityIndex) {
+            setSelectedItem(null);
+          } else {
+            setSelectedItem({ activityIndex, itemIndex });
+          }
+        };
+
+        const handleCategoryClick = (categoryIndex: number) => {
+          if (!selectedItem || selectedItem.activityIndex !== activityIndex) return;
+          const { itemIndex } = selectedItem;
+          handleInputChange(activityIndex, itemIndex, String(categoryIndex));
+          setSelectedItem(null);
+        };
+        
+        return (
+          <div>
+            <p className="mb-4">{activity.instructions}</p>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {activity.data.categories.map((cat: string, catIndex: number) => {
+                const isTarget = selectedItem?.activityIndex === activityIndex;
+                return (
+                  <div
+                    key={catIndex}
+                    onClick={() => handleCategoryClick(catIndex)}
+                    className={`bg-slate-100 p-4 rounded-lg transition-all duration-300 ${isTarget ? 'cursor-pointer ring-2 ring-primary ring-offset-2 hover:bg-slate-200' : ''}`}
+                  >
+                    <h4 className="font-bold text-center mb-2 min-h-[48px] flex items-center justify-center">{cat}</h4>
+                    <div className="min-h-[100px] border-2 border-dashed rounded-lg p-2 flex flex-wrap gap-2 justify-center items-center">
+                      {activity.data.items.map((item: { image: string }, itemIndex: number) =>
+                        placements[itemIndex] === String(catIndex) && (
+                          <div
+                            key={itemIndex}
+                            onClick={(e) => { e.stopPropagation(); handleItemClick(itemIndex); }}
+                            className={`p-2 bg-white rounded-full shadow-sm text-2xl transition-all duration-200 cursor-pointer animate-pop-in ${selectedItem?.itemIndex === itemIndex && selectedItem?.activityIndex === activityIndex ? 'scale-110 ring-2 ring-accent' : 'hover:scale-110'}`}
+                          >
+                            {item.image}
+                          </div>
+                        )
+                      )}
                     </div>
-                ))}
-              </div>
-              <div className="mt-4 flex flex-wrap justify-center gap-4">
-                  {activity.data.items.map((item: any, itemIndex: number) => (
-                      <div key={itemIndex} className="p-2 bg-white rounded-full shadow-sm text-2xl cursor-pointer">
+                  </div>
+                );
+              })}
+            </div>
+            
+            <div className="mt-8">
+              <h4 className="font-bold text-center mb-4 text-text-secondary">Aliments per classificar</h4>
+              <div className="min-h-[100px] bg-slate-50 border-2 border-dashed rounded-lg p-4 flex flex-wrap gap-4 justify-center items-center">
+                {activity.data.items.some((_:any, i: number) => !placements[i] || placements[i] === '') ? (
+                  activity.data.items.map((item: { image: string }, itemIndex: number) => {
+                    if (!placements[itemIndex] || placements[itemIndex] === '') {
+                      return (
+                        <div
+                          key={itemIndex}
+                          onClick={() => handleItemClick(itemIndex)}
+                          className={`p-2 bg-white rounded-full shadow-sm text-2xl transition-all duration-200 cursor-pointer ${selectedItem?.itemIndex === itemIndex && selectedItem?.activityIndex === activityIndex ? 'scale-110 ring-2 ring-accent' : 'hover:scale-110'}`}
+                        >
                           {item.image}
-                      </div>
-                  ))}
+                        </div>
+                      );
+                    }
+                    return null;
+                  })
+                ) : <p className="text-slate-500">Tots els aliments classificats!</p>}
               </div>
             </div>
-         );
+          </div>
+        );
+      }
        case 'timeline':
             return (
                 <div>
